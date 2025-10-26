@@ -5,7 +5,6 @@ Send personalized messages via WhatsApp Web using contacts from an Excel file, e
 ## Files
 
 - [main.py](main.py) — core program with functions: `read_contacts`, `read_event`, `read_template`, `setup_driver`, `wait_for_logged_in`, `send_message`, `send_messages`
-- [template.txt](template.txt) — message template with placeholders
 - [requirements.txt](requirements.txt) — Python dependencies
 - [.gitignore](.gitignore) — ignored files/patterns
 
@@ -13,11 +12,13 @@ Send personalized messages via WhatsApp Web using contacts from an Excel file, e
 
 - `contacts.xlsx` — Excel file with contact information (see format below)
 - `event.json` — JSON file with event details (see format below)
+- `template.txt` — message template with placeholders (see format below)
 
 ### Example files provided
 
 - [contacts.example.xlsx](contacts.example.xlsx) — example contact format
 - [event.example.json](event.example.json) — example event format
+- [template.example.txt](template.example.txt) — example message template
 
 ## Description
 
@@ -108,6 +109,7 @@ Example:
 
 3. Create required files:
    - Copy `event.example.json` to `event.json` and fill in your event details
+   - Copy `template.example.txt` to `template.txt` and customize your message
    - Create `contacts.xlsx` with your contacts (use `contacts.example.xlsx` as reference)
 
 ## Usage

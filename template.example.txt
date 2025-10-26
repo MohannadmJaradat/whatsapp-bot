@@ -1,0 +1,11 @@
+Hello {nickname}
+
+You are invited to:
+{groom} and {bride}
+
+- Date: {day}, {date} at {time}
+- Location: {destination}
+{map1}
+
+- Meeting point: {source} at {gather_time}
+{map2}
