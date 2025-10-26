@@ -1,0 +1,9 @@
+السلام عليكم {nickname}
+اتشرف بدعوتكم لجاهة خطوبة ابني :
+{groom} و
+{bride}.
+
+- يوم {day} الموافق {date} الساعة ({time}) {destination}.
+{map1}
+- نقطة التجمع - {source} - الساعه({gather_time}).
+{map2}

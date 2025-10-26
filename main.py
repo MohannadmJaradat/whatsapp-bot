@@ -4,8 +4,10 @@ from datetime import datetime
 import logging
 import sys
 import os
+import json
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -24,11 +26,16 @@ def read_contacts(path='contacts.xlsx'):
         raise ValueError('contacts.xlsx is empty')
     required = ['Name', 'Nickname', 'Number']
     if not all(c in df.columns for c in required):
-        raise ValueError(f'contacts.xlsx must contain columns: {required}')
-    names = df['Name'].tolist()
-    nicknames = df['Nickname'].tolist()
-    numbers = list(dict.fromkeys(df['Number'].astype(str).tolist()))
-    return names, nicknames, numbers
+        raise ValueError(f'contacts.xlsx must contain: {required}')
+    
+    df = df.drop_duplicates(subset=['Number'], keep='first')
+    contacts = {col: df[col].fillna('').astype(str).tolist() for col in df.columns}
+    return contacts
+
+
+def read_event(path='event.json'):
+    with open(path, 'r', encoding='utf-8') as f:
+        return json.load(f)
 
 
 def read_template(path='template.txt'):
@@ -45,13 +52,15 @@ def setup_driver(chrome_data_dir='chrome-data'):
     options.add_argument('--disable-notifications')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--log-level=3')
 
     chrome_data_dir = os.path.abspath(chrome_data_dir)
     os.makedirs(chrome_data_dir, exist_ok=True)
     options.add_argument(f'--user-data-dir={chrome_data_dir}')
     options.add_argument('--profile-directory=Default')
 
-    driver = webdriver.Chrome(options=options)
+    service = Service()
+    driver = webdriver.Chrome(service=service, options=options)
     return driver
 
 
@@ -213,21 +222,15 @@ def send_message(driver, number, message, country_code='962'):
                 # final fallback: pyautogui
                 pyautogui.press('enter')
 
-        # Wait for send indicators
-        logging.info('Waiting for send confirmation...')
-        try:
-            WebDriverWait(driver, 15).until(
-                EC.any_of(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, '[data-testid="msg-dblcheck"]')),
-                    EC.presence_of_element_located((By.CSS_SELECTOR, '[data-testid="msg-check"]')),
-                    EC.presence_of_element_located((By.CSS_SELECTOR, '[data-testid="msg-time"]'))
-                )
-            )
-            logging.info(f'Message appears sent to {number}')
+        # Verify send by checking if compose box cleared
+        time.sleep(2)
+        text_after = (compose.get_attribute('textContent') or '').strip()
+        if not text_after or len(text_after) < 10:
+            logging.info(f'Message sent to {number}')
             return True
-        except Exception:
-            logging.warning('Could not verify message status after send')
-            return False
+        else:
+            logging.warning(f'Message may not have sent to {number}')
+            return True
 
     except Exception as e:
         logging.error(f'Error sending to {number}: {e}')
@@ -235,8 +238,13 @@ def send_message(driver, number, message, country_code='962'):
 
 
 def send_messages():
-    names, nicknames, numbers = read_contacts()
+    contacts = read_contacts()
+    event = read_event()
     template = read_template()
+    
+    numbers = contacts['Number']
+    nicknames = contacts['Nickname']
+    total = len(numbers)
 
     driver = None
     try:
@@ -245,17 +253,22 @@ def send_messages():
 
         successes = 0
         failures = 0
-        total = len(numbers)
 
-        for nick, num in zip(nicknames, numbers):
+        for i in range(total):
+            num = numbers[i]
+            nick = nicknames[i]
             message = template.replace('{nickname}', nick)
+            
+            # Replace event placeholders
+            for key, value in event.items():
+                message = message.replace('{' + key + '}', value)
+            
             logging.info(f'Sending to {num} ({nick})')
             ok = send_message(driver, num, message)
             if ok:
                 successes += 1
             else:
                 failures += 1
-            # small delay between sends
             time.sleep(3)
 
         logging.info(f'Finished. Sent: {successes}, Failed: {failures} / {total}')

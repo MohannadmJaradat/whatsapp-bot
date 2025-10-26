@@ -1,0 +1,7 @@
+contacts.xlsx
+~$contacts.xlsx
+PyWhatKit_DB.txt
+myenv
+*-data
+*.log
+event.json

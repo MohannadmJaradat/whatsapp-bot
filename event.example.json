@@ -1,0 +1,12 @@
+{
+  "groom": "Groom Full Name",
+  "bride": "Bride Full Name",
+  "date": "DD-MM-YYYY",
+  "day": "Day Name",
+  "time": "Event Time",
+  "gather_time": "Gathering Time",
+  "destination": "Event Location",
+  "source": "Meeting Point",
+  "map1": "https://maps.google.com/link1",
+  "map2": "https://maps.google.com/link2"
+}
