@@ -111,6 +111,7 @@ Example:
    - Copy `event.example.json` to `event.json` and fill in your event details
    - Copy `template.example.txt` to `template.txt` and customize your message
    - Create `contacts.xlsx` with your contacts (use `contacts.example.xlsx` as reference)
+   - OR use the VCF converter utility (see below) if you have contacts in VCF format
 
 ## Usage
 
@@ -139,6 +140,27 @@ The script will:
 - Script logs progress to console
 - If ChromeDriver download hangs, run `pip install --upgrade selenium` and try again
 - Automation may violate WhatsApp terms; use responsibly
+
+## VCF to Excel Converter
+
+If you have contacts exported as a VCF file, use the included `vcf_to_excel.py` utility to convert them to the required Excel format:
+
+```bash
+python vcf_to_excel.py contacts.vcf
+```
+
+This will create `contacts.xlsx` with:
+
+- Name and Number columns populated from the VCF file
+- Nickname column left empty for you to fill manually
+
+**Note:** Some Arabic names may not display correctly due to encoding issues in the source VCF file. You may need to manually correct these names in the Excel file after conversion.
+
+Optionally specify a custom output file:
+
+```bash
+python vcf_to_excel.py contacts.vcf my_contacts.xlsx
+```
 
 ## Reusability
 
